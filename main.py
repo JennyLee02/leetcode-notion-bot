@@ -19,7 +19,7 @@ print("Status:", response.status_code)
 
 for page in data["results"]:
     properties = page["properties"]
-    name_property = properties["Name"]["title"]
+    name_property = properties["Problem"]["title"]
 
     if name_property:
         problem_name = name_property[0]["plain_text"]
