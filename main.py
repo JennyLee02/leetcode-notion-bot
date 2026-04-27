@@ -1,6 +1,5 @@
 import os
 import requests
-from datetime import datetime
 
 NOTION_API_KEY = os.environ["NOTION_API_KEY"]
 DATABASE_ID = os.environ["NOTION_DATABASE_ID"]
@@ -11,28 +10,104 @@ headers = {
     "Content-Type": "application/json",
 }
 
-url = f"https://api.notion.com/v1/databases/{DATABASE_ID}/query"
+PROBLEMS = [
+    {
+        "problem": "Contains Duplicate",
+        "link": "https://leetcode.com/problems/contains-duplicate/",
+        "topic": "Arrays & Hashing",
+        "difficulty": "Easy",
+    },
+    {
+        "problem": "Valid Anagram",
+        "link": "https://leetcode.com/problems/valid-anagram/",
+        "topic": "Arrays & Hashing",
+        "difficulty": "Easy",
+    },
+    {
+        "problem": "Two Sum",
+        "link": "https://leetcode.com/problems/two-sum/",
+        "topic": "Arrays & Hashing",
+        "difficulty": "Easy",
+    },
+    {
+        "problem": "Group Anagrams",
+        "link": "https://leetcode.com/problems/group-anagrams/",
+        "topic": "Arrays & Hashing",
+        "difficulty": "Medium",
+    },
+    {
+        "problem": "Top K Frequent Elements",
+        "link": "https://leetcode.com/problems/top-k-frequent-elements/",
+        "topic": "Arrays & Hashing",
+        "difficulty": "Medium",
+    },
+    {
+        "problem": "Encode and Decode Strings",
+        "link": "https://leetcode.com/problems/encode-and-decode-strings/",
+        "topic": "Arrays & Hashing",
+        "difficulty": "Medium",
+    },
+    {
+        "problem": "Product of Array Except Self",
+        "link": "https://leetcode.com/problems/product-of-array-except-self/",
+        "topic": "Arrays & Hashing",
+        "difficulty": "Medium",
+    },
+    {
+        "problem": "Valid Sudoku",
+        "link": "https://leetcode.com/problems/valid-sudoku/",
+        "topic": "Arrays & Hashing",
+        "difficulty": "Medium",
+    },
+    {
+        "problem": "Longest Consecutive Sequence",
+        "link": "https://leetcode.com/problems/longest-consecutive-sequence/",
+        "topic": "Arrays & Hashing",
+        "difficulty": "Medium",
+    },
+]
 
-response = requests.post(url, headers=headers)
-data = response.json()
+def create_problem(problem):
+    url = "https://api.notion.com/v1/pages"
 
-today = datetime.now().date()
+    payload = {
+        "parent": {"database_id": DATABASE_ID},
+        "properties": {
+            "Problem": {
+                "title": [
+                    {
+                        "text": {
+                            "content": problem["problem"]
+                        }
+                    }
+                ]
+            },
+            "Link": {
+                "url": problem["link"]
+            },
+            "Topic": {
+                "select": {
+                    "name": problem["topic"]
+                }
+            },
+            "Difficulty": {
+                "select": {
+                    "name": problem["difficulty"]
+                }
+            },
+            "Status": {
+                "select": {
+                    "name": "Not Started"
+                }
+            },
+            "Attempts": {
+                "number": 0
+            }
+        }
+    }
 
-print("Status:", response.status_code)
-print("\nReview Problems:")
+    response = requests.post(url, headers=headers, json=payload)
+    print(problem["problem"], response.status_code)
 
-for page in data["results"]:
-    properties = page["properties"]
-
-    name_property = properties["Problem"]["title"]
-    if not name_property:
-        continue
-
-    problem_name = name_property[0]["plain_text"]
-    next_review = properties["Next Review"]["date"]
-
-    if next_review:
-        review_date = next_review["start"][:10]
-
-        if review_date <= str(today):
-            print("-", problem_name)
+for problem in PROBLEMS:
+    create_problem(problem)
