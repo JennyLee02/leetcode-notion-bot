@@ -18,7 +18,6 @@ def get_pages():
 
 def update_next_review(page_id, days):
     url = f"https://api.notion.com/v1/pages/{page_id}"
-
     next_date = (datetime.now() + timedelta(days=days)).strftime("%Y-%m-%d")
 
     payload = {
@@ -34,9 +33,9 @@ def update_next_review(page_id, days):
     response = requests.patch(url, headers=headers, json=payload)
     print("Updated review date:", next_date, "status:", response.status_code)
 
-def get_review_problems(pages):
+def get_due_reviews(pages):
     today = str(datetime.now().date())
-    review = []
+    due = []
 
     for page in pages:
         props = page["properties"]
@@ -45,21 +44,37 @@ def get_review_problems(pages):
         if not name_prop:
             continue
 
-        name = name_prop[0]["plain_text"]
-        page_id = page["id"]
         next_review = props["Next Review"]["date"]
 
         if next_review:
             review_date = next_review["start"][:10]
 
             if review_date <= today:
-                review.append({
-                    "name": name,
-                    "page_id": page_id,
+                due.append({
+                    "name": name_prop[0]["plain_text"],
+                    "page_id": page["id"],
                     "props": props
                 })
 
-    return review
+    return due
+
+def process_reviews(due_reviews):
+    for item in due_reviews:
+        confidence = item["props"]["Confidence"]["number"]
+
+        if confidence is None:
+            continue
+
+        confidence = int(confidence)
+
+        if confidence <= 2:
+            update_next_review(item["page_id"], 1)
+        elif confidence == 3:
+            update_next_review(item["page_id"], 2)
+        elif confidence == 4:
+            update_next_review(item["page_id"], 5)
+        elif confidence >= 5:
+            update_next_review(item["page_id"], 7)
 
 def get_new_problems(pages, review_names, limit=3):
     new = []
@@ -86,35 +101,21 @@ def get_new_problems(pages, review_names, limit=3):
 
     return new
 
-def process_reviews(review):
-    for item in review:
-        props = item["props"]
-        page_id = item["page_id"]
-
-        confidence_prop = props["Confidence"]["number"]
-
-        if confidence_prop is None:
-            continue
-
-        confidence = int(confidence_prop)
-
-        if confidence <= 2:
-            update_next_review(page_id, 1)
-        elif confidence == 3:
-            update_next_review(page_id, 2)
-        elif confidence == 4:
-            update_next_review(page_id, 5)
-        elif confidence >= 5:
-            update_next_review(page_id, 7)
-
+# 1. Get current pages
 pages = get_pages()
-review = get_review_problems(pages)
 
+# 2. Find reviews due today
+due_reviews = get_due_reviews(pages)
+
+# 3. Update Next Review based on Confidence
+process_reviews(due_reviews)
+
+# 4. Refresh pages after updates
+pages = get_pages()
+
+# 5. Generate clean daily plan
+review = get_due_reviews(pages)
 review_names = set([r["name"] for r in review])
-
-# 🔥 Update next review dates
-process_reviews(review)
-
 new = get_new_problems(pages, review_names)
 
 print("\n==============================")
