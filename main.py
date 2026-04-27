@@ -29,13 +29,17 @@ def get_review_problems(pages):
             continue
 
         name = name_prop[0]["plain_text"]
+        page_id = page["id"]
         next_review = props["Next Review"]["date"]
 
         if next_review:
             review_date = next_review["start"][:10]
 
             if review_date <= today:
-                review.append(name)
+                review.append({
+                    "name": name,
+                    "page_id": page_id
+                })
 
     return review
 
@@ -68,14 +72,14 @@ print("\n==============================")
 print("TODAY'S LEETCODE PLAN")
 print("==============================")
 
-print("\nReview:")
+print("\n🔁 Review:")
 if review:
     for problem in review:
-        print("-", problem)
+        print("-", problem["name"])
 else:
-    print("None")
+    print("None 🎉")
 
-print("\nNew:")
+print("\n🆕 New:")
 if new:
     for problem in new:
         print("-", problem)
