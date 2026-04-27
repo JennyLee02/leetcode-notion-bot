@@ -22,6 +22,20 @@ PROBLEMS = [
     {"problem": "Longest Consecutive Sequence", "link": "https://leetcode.com/problems/longest-consecutive-sequence/", "topic": "Arrays & Hashing", "difficulty": "Medium"},
 ]
 
+def get_existing_problems():
+    url = f"https://api.notion.com/v1/databases/{DATABASE_ID}/query"
+
+    response = requests.post(url, headers=headers)
+    data = response.json()
+
+    existing = set()
+
+    for page in data["results"]:
+        name_prop = page["properties"]["Problem"]["title"]
+        if name_prop:
+            existing.add(name_prop[0]["plain_text"])
+
+    return existing
 def create_problem(problem):
     url = "https://api.notion.com/v1/pages"
 
