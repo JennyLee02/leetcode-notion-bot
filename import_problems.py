@@ -1,3 +1,15 @@
+import os
+import requests
+
+NOTION_API_KEY = os.environ["NOTION_API_KEY"]
+DATABASE_ID = os.environ["NOTION_DATABASE_ID"]
+
+headers = {
+    "Authorization": f"Bearer {NOTION_API_KEY}",
+    "Notion-Version": "2022-06-28",
+    "Content-Type": "application/json",
+}
+
 PROBLEMS = [
     # Arrays & Hashing
     {"problem": "Contains Duplicate", "link": "https://leetcode.com/problems/contains-duplicate/", "topic": "Arrays & Hashing", "difficulty": "Easy"},
@@ -87,3 +99,43 @@ PROBLEMS = [
     {"problem": "Design Twitter", "link": "https://leetcode.com/problems/design-twitter/", "topic": "Heap / Priority Queue", "difficulty": "Medium"},
     {"problem": "Find Median from Data Stream", "link": "https://leetcode.com/problems/find-median-from-data-stream/", "topic": "Heap / Priority Queue", "difficulty": "Hard"},
 ]
+
+def get_pages():
+    url = f"https://api.notion.com/v1/databases/{DATABASE_ID}/query"
+    response = requests.post(url, headers=headers)
+    return response.json()["results"]
+
+def create_problem(problem):
+    url = "https://api.notion.com/v1/pages"
+
+    payload = {
+        "parent": {"database_id": DATABASE_ID},
+        "properties": {
+            "Problem": {"title": [{"text": {"content": problem["problem"]}}]},
+            "URL": {"url": problem["link"]},
+            "Topic": {"multi_select": [{"name": problem["topic"]}]},
+            "Difficulty": {"select": {"name": problem["difficulty"]}},
+            "Status": {"select": {"name": "Not Started"}},
+            "Attempts": {"number": 0},
+        },
+    }
+
+    response = requests.post(url, headers=headers, json=payload)
+    print(problem["problem"], response.status_code)
+
+    if response.status_code not in [200, 201]:
+        print(response.text)
+
+pages = get_pages()
+existing = set()
+
+for page in pages:
+    name_prop = page["properties"]["Problem"]["title"]
+    if name_prop:
+        existing.add(name_prop[0]["plain_text"])
+
+for problem in PROBLEMS:
+    if problem["problem"] in existing:
+        print(problem["problem"], "already exists")
+    else:
+        create_problem(problem)
