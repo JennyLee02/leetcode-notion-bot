@@ -98,6 +98,104 @@ PROBLEMS = [
     {"problem": "Task Scheduler", "link": "https://leetcode.com/problems/task-scheduler/", "topic": "Heap / Priority Queue", "difficulty": "Medium"},
     {"problem": "Design Twitter", "link": "https://leetcode.com/problems/design-twitter/", "topic": "Heap / Priority Queue", "difficulty": "Medium"},
     {"problem": "Find Median from Data Stream", "link": "https://leetcode.com/problems/find-median-from-data-stream/", "topic": "Heap / Priority Queue", "difficulty": "Hard"},
+
+        # Backtracking
+    {"problem": "Subsets", "link": "https://leetcode.com/problems/subsets/", "topic": "Backtracking", "difficulty": "Medium"},
+    {"problem": "Combination Sum", "link": "https://leetcode.com/problems/combination-sum/", "topic": "Backtracking", "difficulty": "Medium"},
+    {"problem": "Permutations", "link": "https://leetcode.com/problems/permutations/", "topic": "Backtracking", "difficulty": "Medium"},
+    {"problem": "Subsets II", "link": "https://leetcode.com/problems/subsets-ii/", "topic": "Backtracking", "difficulty": "Medium"},
+    {"problem": "Combination Sum II", "link": "https://leetcode.com/problems/combination-sum-ii/", "topic": "Backtracking", "difficulty": "Medium"},
+    {"problem": "Word Search", "link": "https://leetcode.com/problems/word-search/", "topic": "Backtracking", "difficulty": "Medium"},
+    {"problem": "Palindrome Partitioning", "link": "https://leetcode.com/problems/palindrome-partitioning/", "topic": "Backtracking", "difficulty": "Medium"},
+    {"problem": "Letter Combinations of a Phone Number", "link": "https://leetcode.com/problems/letter-combinations-of-a-phone-number/", "topic": "Backtracking", "difficulty": "Medium"},
+    {"problem": "N-Queens", "link": "https://leetcode.com/problems/n-queens/", "topic": "Backtracking", "difficulty": "Hard"},
+
+    # Graphs
+    {"problem": "Number of Islands", "link": "https://leetcode.com/problems/number-of-islands/", "topic": "Graphs", "difficulty": "Medium"},
+    {"problem": "Clone Graph", "link": "https://leetcode.com/problems/clone-graph/", "topic": "Graphs", "difficulty": "Medium"},
+    {"problem": "Max Area of Island", "link": "https://leetcode.com/problems/max-area-of-island/", "topic": "Graphs", "difficulty": "Medium"},
+    {"problem": "Pacific Atlantic Water Flow", "link": "https://leetcode.com/problems/pacific-atlantic-water-flow/", "topic": "Graphs", "difficulty": "Medium"},
+    {"problem": "Surrounded Regions", "link": "https://leetcode.com/problems/surrounded-regions/", "topic": "Graphs", "difficulty": "Medium"},
+    {"problem": "Rotting Oranges", "link": "https://leetcode.com/problems/rotting-oranges/", "topic": "Graphs", "difficulty": "Medium"},
+    {"problem": "Walls and Gates", "link": "https://leetcode.com/problems/walls-and-gates/", "topic": "Graphs", "difficulty": "Medium"},
+    {"problem": "Course Schedule", "link": "https://leetcode.com/problems/course-schedule/", "topic": "Graphs", "difficulty": "Medium"},
+    {"problem": "Course Schedule II", "link": "https://leetcode.com/problems/course-schedule-ii/", "topic": "Graphs", "difficulty": "Medium"},
+    {"problem": "Redundant Connection", "link": "https://leetcode.com/problems/redundant-connection/", "topic": "Graphs", "difficulty": "Medium"},
+    {"problem": "Number of Connected Components in an Undirected Graph", "link": "https://leetcode.com/problems/number-of-connected-components-in-an-undirected-graph/", "topic": "Graphs", "difficulty": "Medium"},
+    {"problem": "Graph Valid Tree", "link": "https://leetcode.com/problems/graph-valid-tree/", "topic": "Graphs", "difficulty": "Medium"},
+    {"problem": "Word Ladder", "link": "https://leetcode.com/problems/word-ladder/", "topic": "Graphs", "difficulty": "Hard"},
+
+    # Advanced Graphs
+    {"problem": "Reconstruct Itinerary", "link": "https://leetcode.com/problems/reconstruct-itinerary/", "topic": "Advanced Graphs", "difficulty": "Hard"},
+    {"problem": "Min Cost to Connect All Points", "link": "https://leetcode.com/problems/min-cost-to-connect-all-points/", "topic": "Advanced Graphs", "difficulty": "Medium"},
+    {"problem": "Network Delay Time", "link": "https://leetcode.com/problems/network-delay-time/", "topic": "Advanced Graphs", "difficulty": "Medium"},
+    {"problem": "Swim in Rising Water", "link": "https://leetcode.com/problems/swim-in-rising-water/", "topic": "Advanced Graphs", "difficulty": "Hard"},
+    {"problem": "Alien Dictionary", "link": "https://leetcode.com/problems/alien-dictionary/", "topic": "Advanced Graphs", "difficulty": "Hard"},
+    {"problem": "Cheapest Flights Within K Stops", "link": "https://leetcode.com/problems/cheapest-flights-within-k-stops/", "topic": "Advanced Graphs", "difficulty": "Medium"},
+
+    # 1-D Dynamic Programming
+    {"problem": "Climbing Stairs", "link": "https://leetcode.com/problems/climbing-stairs/", "topic": "1-D Dynamic Programming", "difficulty": "Easy"},
+    {"problem": "Min Cost Climbing Stairs", "link": "https://leetcode.com/problems/min-cost-climbing-stairs/", "topic": "1-D Dynamic Programming", "difficulty": "Easy"},
+    {"problem": "House Robber", "link": "https://leetcode.com/problems/house-robber/", "topic": "1-D Dynamic Programming", "difficulty": "Medium"},
+    {"problem": "House Robber II", "link": "https://leetcode.com/problems/house-robber-ii/", "topic": "1-D Dynamic Programming", "difficulty": "Medium"},
+    {"problem": "Longest Palindromic Substring", "link": "https://leetcode.com/problems/longest-palindromic-substring/", "topic": "1-D Dynamic Programming", "difficulty": "Medium"},
+    {"problem": "Palindromic Substrings", "link": "https://leetcode.com/problems/palindromic-substrings/", "topic": "1-D Dynamic Programming", "difficulty": "Medium"},
+    {"problem": "Decode Ways", "link": "https://leetcode.com/problems/decode-ways/", "topic": "1-D Dynamic Programming", "difficulty": "Medium"},
+    {"problem": "Coin Change", "link": "https://leetcode.com/problems/coin-change/", "topic": "1-D Dynamic Programming", "difficulty": "Medium"},
+    {"problem": "Maximum Product Subarray", "link": "https://leetcode.com/problems/maximum-product-subarray/", "topic": "1-D Dynamic Programming", "difficulty": "Medium"},
+    {"problem": "Word Break", "link": "https://leetcode.com/problems/word-break/", "topic": "1-D Dynamic Programming", "difficulty": "Medium"},
+    {"problem": "Longest Increasing Subsequence", "link": "https://leetcode.com/problems/longest-increasing-subsequence/", "topic": "1-D Dynamic Programming", "difficulty": "Medium"},
+    {"problem": "Partition Equal Subset Sum", "link": "https://leetcode.com/problems/partition-equal-subset-sum/", "topic": "1-D Dynamic Programming", "difficulty": "Medium"},
+
+    # 2-D Dynamic Programming
+    {"problem": "Unique Paths", "link": "https://leetcode.com/problems/unique-paths/", "topic": "2-D Dynamic Programming", "difficulty": "Medium"},
+    {"problem": "Longest Common Subsequence", "link": "https://leetcode.com/problems/longest-common-subsequence/", "topic": "2-D Dynamic Programming", "difficulty": "Medium"},
+    {"problem": "Best Time to Buy and Sell Stock with Cooldown", "link": "https://leetcode.com/problems/best-time-to-buy-and-sell-stock-with-cooldown/", "topic": "2-D Dynamic Programming", "difficulty": "Medium"},
+    {"problem": "Coin Change II", "link": "https://leetcode.com/problems/coin-change-ii/", "topic": "2-D Dynamic Programming", "difficulty": "Medium"},
+    {"problem": "Target Sum", "link": "https://leetcode.com/problems/target-sum/", "topic": "2-D Dynamic Programming", "difficulty": "Medium"},
+    {"problem": "Interleaving String", "link": "https://leetcode.com/problems/interleaving-string/", "topic": "2-D Dynamic Programming", "difficulty": "Medium"},
+    {"problem": "Longest Increasing Path in a Matrix", "link": "https://leetcode.com/problems/longest-increasing-path-in-a-matrix/", "topic": "2-D Dynamic Programming", "difficulty": "Hard"},
+    {"problem": "Distinct Subsequences", "link": "https://leetcode.com/problems/distinct-subsequences/", "topic": "2-D Dynamic Programming", "difficulty": "Hard"},
+    {"problem": "Edit Distance", "link": "https://leetcode.com/problems/edit-distance/", "topic": "2-D Dynamic Programming", "difficulty": "Medium"},
+    {"problem": "Burst Balloons", "link": "https://leetcode.com/problems/burst-balloons/", "topic": "2-D Dynamic Programming", "difficulty": "Hard"},
+    {"problem": "Regular Expression Matching", "link": "https://leetcode.com/problems/regular-expression-matching/", "topic": "2-D Dynamic Programming", "difficulty": "Hard"},
+
+    # Greedy
+    {"problem": "Maximum Subarray", "link": "https://leetcode.com/problems/maximum-subarray/", "topic": "Greedy", "difficulty": "Medium"},
+    {"problem": "Jump Game", "link": "https://leetcode.com/problems/jump-game/", "topic": "Greedy", "difficulty": "Medium"},
+    {"problem": "Jump Game II", "link": "https://leetcode.com/problems/jump-game-ii/", "topic": "Greedy", "difficulty": "Medium"},
+    {"problem": "Gas Station", "link": "https://leetcode.com/problems/gas-station/", "topic": "Greedy", "difficulty": "Medium"},
+    {"problem": "Hand of Straights", "link": "https://leetcode.com/problems/hand-of-straights/", "topic": "Greedy", "difficulty": "Medium"},
+    {"problem": "Merge Triplets to Form Target Triplet", "link": "https://leetcode.com/problems/merge-triplets-to-form-target-triplet/", "topic": "Greedy", "difficulty": "Medium"},
+    {"problem": "Partition Labels", "link": "https://leetcode.com/problems/partition-labels/", "topic": "Greedy", "difficulty": "Medium"},
+    {"problem": "Valid Parenthesis String", "link": "https://leetcode.com/problems/valid-parenthesis-string/", "topic": "Greedy", "difficulty": "Medium"},
+
+    # Intervals
+    {"problem": "Insert Interval", "link": "https://leetcode.com/problems/insert-interval/", "topic": "Intervals", "difficulty": "Medium"},
+    {"problem": "Merge Intervals", "link": "https://leetcode.com/problems/merge-intervals/", "topic": "Intervals", "difficulty": "Medium"},
+    {"problem": "Non-overlapping Intervals", "link": "https://leetcode.com/problems/non-overlapping-intervals/", "topic": "Intervals", "difficulty": "Medium"},
+    {"problem": "Meeting Rooms", "link": "https://leetcode.com/problems/meeting-rooms/", "topic": "Intervals", "difficulty": "Easy"},
+    {"problem": "Meeting Rooms II", "link": "https://leetcode.com/problems/meeting-rooms-ii/", "topic": "Intervals", "difficulty": "Medium"},
+    {"problem": "Minimum Interval to Include Each Query", "link": "https://leetcode.com/problems/minimum-interval-to-include-each-query/", "topic": "Intervals", "difficulty": "Hard"},
+
+    # Math & Geometry
+    {"problem": "Rotate Image", "link": "https://leetcode.com/problems/rotate-image/", "topic": "Math & Geometry", "difficulty": "Medium"},
+    {"problem": "Spiral Matrix", "link": "https://leetcode.com/problems/spiral-matrix/", "topic": "Math & Geometry", "difficulty": "Medium"},
+    {"problem": "Set Matrix Zeroes", "link": "https://leetcode.com/problems/set-matrix-zeroes/", "topic": "Math & Geometry", "difficulty": "Medium"},
+    {"problem": "Happy Number", "link": "https://leetcode.com/problems/happy-number/", "topic": "Math & Geometry", "difficulty": "Easy"},
+    {"problem": "Plus One", "link": "https://leetcode.com/problems/plus-one/", "topic": "Math & Geometry", "difficulty": "Easy"},
+    {"problem": "Pow(x, n)", "link": "https://leetcode.com/problems/powx-n/", "topic": "Math & Geometry", "difficulty": "Medium"},
+    {"problem": "Multiply Strings", "link": "https://leetcode.com/problems/multiply-strings/", "topic": "Math & Geometry", "difficulty": "Medium"},
+    {"problem": "Detect Squares", "link": "https://leetcode.com/problems/detect-squares/", "topic": "Math & Geometry", "difficulty": "Medium"},
+
+    # Bit Manipulation
+    {"problem": "Single Number", "link": "https://leetcode.com/problems/single-number/", "topic": "Bit Manipulation", "difficulty": "Easy"},
+    {"problem": "Number of 1 Bits", "link": "https://leetcode.com/problems/number-of-1-bits/", "topic": "Bit Manipulation", "difficulty": "Easy"},
+    {"problem": "Counting Bits", "link": "https://leetcode.com/problems/counting-bits/", "topic": "Bit Manipulation", "difficulty": "Easy"},
+    {"problem": "Reverse Bits", "link": "https://leetcode.com/problems/reverse-bits/", "topic": "Bit Manipulation", "difficulty": "Easy"},
+    {"problem": "Missing Number", "link": "https://leetcode.com/problems/missing-number/", "topic": "Bit Manipulation", "difficulty": "Easy"},
+    {"problem": "Sum of Two Integers", "link": "https://leetcode.com/problems/sum-of-two-integers/", "topic": "Bit Manipulation", "difficulty": "Medium"},
+    {"problem": "Reverse Integer", "link": "https://leetcode.com/problems/reverse-integer/", "topic": "Bit Manipulation", "difficulty": "Medium"},
 ]
 
 def get_pages():
