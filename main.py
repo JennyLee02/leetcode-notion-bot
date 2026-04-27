@@ -16,7 +16,7 @@ url = f"https://api.notion.com/v1/databases/{DATABASE_ID}/query"
 response = requests.post(url, headers=headers)
 data = response.json()
 
-today = datetime.utcnow().date()
+today = datetime.now().date()
 
 print("Status:", response.status_code)
 print("\nReview Problems:")
