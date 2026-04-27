@@ -1,6 +1,6 @@
 import os
 import requests
-//
+
 NOTION_API_KEY = os.environ["NOTION_API_KEY"]
 DATABASE_ID = os.environ["NOTION_DATABASE_ID"]
 
