@@ -11,6 +11,8 @@ headers = {
     "Content-Type": "application/json",
 }
 
+# ---------------- API ----------------
+
 def get_pages():
     url = f"https://api.notion.com/v1/databases/{DATABASE_ID}/query"
     response = requests.post(url, headers=headers)
@@ -23,15 +25,15 @@ def update_next_review(page_id, days):
     payload = {
         "properties": {
             "Next Review": {
-                "date": {
-                    "start": next_date
-                }
+                "date": {"start": next_date}
             }
         }
     }
 
     response = requests.patch(url, headers=headers, json=payload)
     print("Updated review date:", next_date, "status:", response.status_code)
+
+# ---------------- REVIEW ----------------
 
 def get_due_reviews(pages):
     today = str(datetime.now().date())
@@ -76,8 +78,10 @@ def process_reviews(due_reviews):
         elif confidence >= 5:
             update_next_review(item["page_id"], 7)
 
-def get_new_problems(pages, review_names, limit=3):
-    new = []
+# ---------------- NEW SELECTION ----------------
+
+def get_new_problems(pages, review_names):
+    easy, medium, hard = [], [], []
 
     for page in pages:
         props = page["properties"]
@@ -92,44 +96,74 @@ def get_new_problems(pages, review_names, limit=3):
             continue
 
         status = props["Status"]["select"]
+        difficulty = props["Difficulty"]["select"]
 
-        if status and status["name"] == "Not Started":
-            new.append(name)
+        if not status or status["name"] != "Not Started":
+            continue
 
-        if len(new) >= limit:
-            break
+        if not difficulty:
+            continue
 
-    return new
+        diff = difficulty["name"]
 
-# 1. Get current pages
+        if diff == "Easy":
+            easy.append(name)
+        elif diff == "Medium":
+            medium.append(name)
+        elif diff == "Hard":
+            hard.append(name)
+
+    selected = []
+
+    # 1 easy
+    if easy:
+        selected.append(easy[0])
+
+    # 2 medium
+    selected.extend(medium[:2])
+
+    # 0-1 hard
+    if hard:
+        selected.append(hard[0])
+
+    return selected
+
+# ---------------- MAIN FLOW ----------------
+
+# 1. Fetch
 pages = get_pages()
 
-# 2. Find reviews due today
+# 2. Find due reviews
 due_reviews = get_due_reviews(pages)
 
-# 3. Update Next Review based on Confidence
+# 3. Update review schedule
 process_reviews(due_reviews)
 
-# 4. Refresh pages after updates
+# 4. Refresh after updates
 pages = get_pages()
 
-# 5. Generate clean daily plan
-review = get_due_reviews(pages)
+# 5. Final review list (limit 3)
+review = get_due_reviews(pages)[:3]
+
 review_names = set([r["name"] for r in review])
+
+# 6. New selection
 new = get_new_problems(pages, review_names)
+
+# ---------------- OUTPUT ----------------
 
 print("\n==============================")
 print("TODAY'S LEETCODE PLAN")
 print("==============================")
 
-print("\n🔁 Review:")
+print("\n🔁 Review (max 3):")
 if review:
     for problem in review:
         print("-", problem["name"])
 else:
     print("None 🎉")
 
-print("\n🆕 New:")
+print("\n🆕 New (1 Easy, 2 Medium, 0-1 Hard):")
 if new:
     for problem in new:
         print("-", problem)
