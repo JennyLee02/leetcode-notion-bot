@@ -41,9 +41,11 @@ def create_problem(problem):
                 "url": problem["link"]
             },
             "Topic": {
-                "multi_select": {
-                    "name": problem["topic"]
-                }
+                "multi_select": [
+                    {
+                        "name": problem["topic"]
+                    }
+                ]
             },
             "Difficulty": {
                 "select": {
