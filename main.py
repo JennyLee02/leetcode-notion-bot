@@ -24,7 +24,6 @@ PROBLEMS = [
 
 def get_existing_problems():
     url = f"https://api.notion.com/v1/databases/{DATABASE_ID}/query"
-
     response = requests.post(url, headers=headers)
     data = response.json()
 
@@ -36,6 +35,7 @@ def get_existing_problems():
             existing.add(name_prop[0]["plain_text"])
 
     return existing
+
 def create_problem(problem):
     url = "https://api.notion.com/v1/pages"
 
@@ -83,5 +83,10 @@ def create_problem(problem):
     if response.status_code not in [200, 201]:
         print(response.text)
 
+existing = get_existing_problems()
+
 for problem in PROBLEMS:
-    create_problem(problem)
+    if problem["problem"] not in existing:
+        create_problem(problem)
+    else:
+        print(problem["problem"], "already exists")
