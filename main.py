@@ -33,6 +33,7 @@ def get_review_problems(pages):
 
         if next_review:
             review_date = next_review["start"][:10]
+
             if review_date <= today:
                 review.append(name)
 
@@ -63,12 +64,20 @@ pages = get_pages()
 review = get_review_problems(pages)
 new = get_new_problems(pages)
 
-print("\nTODAY'S PLAN")
+print("\n==============================")
+print("TODAY'S LEETCODE PLAN")
+print("==============================")
 
 print("\nReview:")
-for problem in review:
-    print("-", problem)
+if review:
+    for problem in review:
+        print("-", problem)
+else:
+    print("None")
 
 print("\nNew:")
-for problem in new:
-    print("-", problem)
+if new:
+    for problem in new:
+        print("-", problem)
+else:
+    print("None")
