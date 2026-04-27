@@ -11,60 +11,15 @@ headers = {
 }
 
 PROBLEMS = [
-    {
-        "problem": "Contains Duplicate",
-        "link": "https://leetcode.com/problems/contains-duplicate/",
-        "topic": "Arrays & Hashing",
-        "difficulty": "Easy",
-    },
-    {
-        "problem": "Valid Anagram",
-        "link": "https://leetcode.com/problems/valid-anagram/",
-        "topic": "Arrays & Hashing",
-        "difficulty": "Easy",
-    },
-    {
-        "problem": "Two Sum",
-        "link": "https://leetcode.com/problems/two-sum/",
-        "topic": "Arrays & Hashing",
-        "difficulty": "Easy",
-    },
-    {
-        "problem": "Group Anagrams",
-        "link": "https://leetcode.com/problems/group-anagrams/",
-        "topic": "Arrays & Hashing",
-        "difficulty": "Medium",
-    },
-    {
-        "problem": "Top K Frequent Elements",
-        "link": "https://leetcode.com/problems/top-k-frequent-elements/",
-        "topic": "Arrays & Hashing",
-        "difficulty": "Medium",
-    },
-    {
-        "problem": "Encode and Decode Strings",
-        "link": "https://leetcode.com/problems/encode-and-decode-strings/",
-        "topic": "Arrays & Hashing",
-        "difficulty": "Medium",
-    },
-    {
-        "problem": "Product of Array Except Self",
-        "link": "https://leetcode.com/problems/product-of-array-except-self/",
-        "topic": "Arrays & Hashing",
-        "difficulty": "Medium",
-    },
-    {
-        "problem": "Valid Sudoku",
-        "link": "https://leetcode.com/problems/valid-sudoku/",
-        "topic": "Arrays & Hashing",
-        "difficulty": "Medium",
-    },
-    {
-        "problem": "Longest Consecutive Sequence",
-        "link": "https://leetcode.com/problems/longest-consecutive-sequence/",
-        "topic": "Arrays & Hashing",
-        "difficulty": "Medium",
-    },
+    {"problem": "Contains Duplicate", "link": "https://leetcode.com/problems/contains-duplicate/", "topic": "Arrays & Hashing", "difficulty": "Easy"},
+    {"problem": "Valid Anagram", "link": "https://leetcode.com/problems/valid-anagram/", "topic": "Arrays & Hashing", "difficulty": "Easy"},
+    {"problem": "Two Sum", "link": "https://leetcode.com/problems/two-sum/", "topic": "Arrays & Hashing", "difficulty": "Easy"},
+    {"problem": "Group Anagrams", "link": "https://leetcode.com/problems/group-anagrams/", "topic": "Arrays & Hashing", "difficulty": "Medium"},
+    {"problem": "Top K Frequent Elements", "link": "https://leetcode.com/problems/top-k-frequent-elements/", "topic": "Arrays & Hashing", "difficulty": "Medium"},
+    {"problem": "Encode and Decode Strings", "link": "https://leetcode.com/problems/encode-and-decode-strings/", "topic": "Arrays & Hashing", "difficulty": "Medium"},
+    {"problem": "Product of Array Except Self", "link": "https://leetcode.com/problems/product-of-array-except-self/", "topic": "Arrays & Hashing", "difficulty": "Medium"},
+    {"problem": "Valid Sudoku", "link": "https://leetcode.com/problems/valid-sudoku/", "topic": "Arrays & Hashing", "difficulty": "Medium"},
+    {"problem": "Longest Consecutive Sequence", "link": "https://leetcode.com/problems/longest-consecutive-sequence/", "topic": "Arrays & Hashing", "difficulty": "Medium"},
 ]
 
 def create_problem(problem):
@@ -82,7 +37,7 @@ def create_problem(problem):
                     }
                 ]
             },
-            "Link": {
+            "URL": {
                 "url": problem["link"]
             },
             "Topic": {
@@ -108,6 +63,9 @@ def create_problem(problem):
 
     response = requests.post(url, headers=headers, json=payload)
     print(problem["problem"], response.status_code)
+
+    if response.status_code not in [200, 201]:
+        print(response.text)
 
 for problem in PROBLEMS:
     create_problem(problem)
