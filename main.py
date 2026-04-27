@@ -43,7 +43,7 @@ def get_review_problems(pages):
 
     return review
 
-def get_new_problems(pages, limit=3):
+def get_new_problems(pages, review_names, limit=3):
     new = []
 
     for page in pages:
@@ -54,6 +54,11 @@ def get_new_problems(pages, limit=3):
             continue
 
         name = name_prop[0]["plain_text"]
+
+        # 🚫 skip if already in review
+        if name in review_names:
+            continue
+
         status = props["Status"]["select"]
 
         if status and status["name"] == "Not Started":
@@ -66,7 +71,11 @@ def get_new_problems(pages, limit=3):
 
 pages = get_pages()
 review = get_review_problems(pages)
-new = get_new_problems(pages)
+
+# Extract review names for filtering
+review_names = set([r["name"] for r in review])
+
+new = get_new_problems(pages, review_names)
 
 print("\n==============================")
 print("TODAY'S LEETCODE PLAN")
