@@ -1,6 +1,7 @@
 import os
 import requests
 from datetime import datetime, timedelta
+from collections import Counter
 
 NOTION_API_KEY = os.environ["NOTION_API_KEY"]
 DATABASE_ID = os.environ["NOTION_DATABASE_ID"]
@@ -33,6 +34,47 @@ def update_next_review(page_id, days):
     response = requests.patch(url, headers=headers, json=payload)
     print("Updated review date:", next_date, "status:", response.status_code)
 
+# ---------------- HELPERS ----------------
+
+def get_problem_name(page):
+    title = page["properties"]["Problem"]["title"]
+    if not title:
+        return None
+    return title[0]["plain_text"]
+
+def get_topics(page):
+    topics = page["properties"]["Topic"]["multi_select"]
+    return [topic["name"] for topic in topics]
+
+def get_difficulty(page):
+    difficulty = page["properties"]["Difficulty"]["select"]
+    if not difficulty:
+        return None
+    return difficulty["name"]
+
+def get_status(page):
+    status = page["properties"]["Status"]["select"]
+    if not status:
+        return None
+    return status["name"]
+
+def get_confidence(page):
+    return page["properties"]["Confidence"]["number"]
+
+# ---------------- WEAK TOPICS ----------------
+
+def get_weak_topics(pages):
+    weak_topic_counts = Counter()
+
+    for page in pages:
+        confidence = get_confidence(page)
+
+        if confidence is not None and confidence <= 2:
+            for topic in get_topics(page):
+                weak_topic_counts[topic] += 1
+
+    return [topic for topic, count in weak_topic_counts.most_common()]
+
 # ---------------- REVIEW ----------------
 
 def get_due_reviews(pages):
@@ -40,12 +82,11 @@ def get_due_reviews(pages):
     due = []
 
     for page in pages:
-        props = page["properties"]
-        name_prop = props["Problem"]["title"]
-
-        if not name_prop:
+        name = get_problem_name(page)
+        if not name:
             continue
 
+        props = page["properties"]
         next_review = props["Next Review"]["date"]
 
         if next_review:
@@ -53,7 +94,7 @@ def get_due_reviews(pages):
 
             if review_date <= today:
                 due.append({
-                    "name": name_prop[0]["plain_text"],
+                    "name": name,
                     "page_id": page["id"],
                     "props": props
                 })
@@ -80,49 +121,51 @@ def process_reviews(due_reviews):
 
 # ---------------- NEW SELECTION ----------------
 
-def get_new_problems(pages, review_names):
+def get_new_problems(pages, review_names, weak_topics):
     easy, medium, hard = [], [], []
 
     for page in pages:
-        props = page["properties"]
-        name_prop = props["Problem"]["title"]
-
-        if not name_prop:
+        name = get_problem_name(page)
+        if not name or name in review_names:
             continue
 
-        name = name_prop[0]["plain_text"]
+        status = get_status(page)
+        difficulty = get_difficulty(page)
+        topics = get_topics(page)
 
-        if name in review_names:
-            continue
-
-        status = props["Status"]["select"]
-        difficulty = props["Difficulty"]["select"]
-
-        if not status or status["name"] != "Not Started":
+        if status != "Not Started":
             continue
 
         if not difficulty:
             continue
 
-        diff = difficulty["name"]
+        is_weak_topic = any(topic in weak_topics for topic in topics)
 
-        if diff == "Easy":
-            easy.append(name)
-        elif diff == "Medium":
-            medium.append(name)
-        elif diff == "Hard":
-            hard.append(name)
+        item = {
+            "name": name,
+            "topics": topics,
+            "is_weak_topic": is_weak_topic,
+        }
+
+        if difficulty == "Easy":
+            easy.append(item)
+        elif difficulty == "Medium":
+            medium.append(item)
+        elif difficulty == "Hard":
+            hard.append(item)
+
+    # Weak-topic problems come first
+    easy.sort(key=lambda x: not x["is_weak_topic"])
+    medium.sort(key=lambda x: not x["is_weak_topic"])
+    hard.sort(key=lambda x: not x["is_weak_topic"])
 
     selected = []
 
-    # 1 easy
     if easy:
         selected.append(easy[0])
 
-    # 2 medium
     selected.extend(medium[:2])
 
-    # 0-1 hard
     if hard:
         selected.append(hard[0])
 
@@ -130,31 +173,31 @@ def get_new_problems(pages, review_names):
 
 # ---------------- MAIN FLOW ----------------
 
-# 1. Fetch
 pages = get_pages()
 
-# 2. Find due reviews
 due_reviews = get_due_reviews(pages)
-
-# 3. Update review schedule
 process_reviews(due_reviews)
 
-# 4. Refresh after updates
 pages = get_pages()
 
-# 5. Final review list (limit 3)
 review = get_due_reviews(pages)[:3]
-
 review_names = set([r["name"] for r in review])
 
-# 6. New selection
-new = get_new_problems(pages, review_names)
+weak_topics = get_weak_topics(pages)
+new = get_new_problems(pages, review_names, weak_topics)
 
 # ---------------- OUTPUT ----------------
 
 print("\n==============================")
 print("TODAY'S LEETCODE PLAN")
 print("==============================")
+
+print("\nWeak Topics:")
+if weak_topics:
+    for topic in weak_topics:
+        print("-", topic)
+else:
+    print("None")
 
 print("\n🔁 Review (max 3):")
 if review:
@@ -163,9 +206,11 @@ if review:
 else:
     print("None 🎉")
 
-print("\n🆕 New (1 Easy, 2 Medium, 0-1 Hard):")
+print("\n🆕 New (weak topics prioritized):")
 if new:
     for problem in new:
-        print("-", problem)
+        marker = "🔥" if problem["is_weak_topic"] else ""
+        topic_text = ", ".join(problem["topics"])
+        print(f"- {problem['name']} {marker} ({topic_text})")
 else:
     print("None")
