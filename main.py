@@ -12,13 +12,42 @@ headers = {
     "Content-Type": "application/json",
 }
 
+# ---------------- CURRICULUM ROTATION ----------------
+
+CURRICULUM = [
+    "Arrays & Hashing",
+    "Two Pointers",
+    "Sliding Window",
+    "Stack",
+    "Binary Search",
+    "Linked List",
+    "Trees",
+    "Heap / Priority Queue",
+    "Backtracking",
+    "Graphs",
+    "1-D Dynamic Programming",
+    "2-D Dynamic Programming",
+    "Greedy",
+    "Intervals",
+    "Math & Geometry",
+    "Bit Manipulation",
+]
+
+def get_today_focus_topic():
+    day_index = datetime.now().toordinal() % len(CURRICULUM)
+    return CURRICULUM[day_index]
+
 # ---------------- NORMALIZATION ----------------
 
 def normalize_topic(topic):
     mapping = {
         "Array": "Arrays & Hashing",
-        "Hashing": "Arrays & Hashing",
         "Arrays": "Arrays & Hashing",
+        "Hashing": "Arrays & Hashing",
+        "Heap": "Heap / Priority Queue",
+        "Priority Queue": "Heap / Priority Queue",
+        "DP": "1-D Dynamic Programming",
+        "Dynamic Programming": "1-D Dynamic Programming",
     }
     return mapping.get(topic, topic)
 
@@ -89,8 +118,8 @@ def get_due_reviews(pages):
         next_review = page["properties"]["Next Review"]["date"]
 
         if next_review:
-            date = next_review["start"][:10]
-            if date <= today:
+            review_date = next_review["start"][:10]
+            if review_date <= today:
                 due.append({
                     "name": name,
                     "page_id": page["id"],
@@ -116,7 +145,18 @@ def process_reviews(due):
 
 # ---------------- NEW SELECTION ----------------
 
-def get_new_problems(pages, review_names, weak_topics):
+def score_problem(item, focus_topic, weak_topics):
+    score = 0
+
+    if focus_topic in item["topics"]:
+        score += 3
+
+    if any(topic in weak_topics for topic in item["topics"]):
+        score += 2
+
+    return score
+
+def get_new_problems(pages, review_names, weak_topics, focus_topic):
     easy, medium, hard = [], [], []
 
     for page in pages:
@@ -127,24 +167,27 @@ def get_new_problems(pages, review_names, weak_topics):
         if get_status(page) != "Not Started":
             continue
 
-        diff = get_difficulty(page)
+        difficulty = get_difficulty(page)
         topics = get_topics(page)
 
-        is_weak = any(t in weak_topics for t in topics)
+        item = {
+            "name": name,
+            "topics": topics,
+            "score": 0,
+        }
 
-        item = (name, topics, is_weak)
+        item["score"] = score_problem(item, focus_topic, weak_topics)
 
-        if diff == "Easy":
+        if difficulty == "Easy":
             easy.append(item)
-        elif diff == "Medium":
+        elif difficulty == "Medium":
             medium.append(item)
-        elif diff == "Hard":
+        elif difficulty == "Hard":
             hard.append(item)
 
-    # prioritize weak topics
-    easy.sort(key=lambda x: not x[2])
-    medium.sort(key=lambda x: not x[2])
-    hard.sort(key=lambda x: not x[2])
+    easy.sort(key=lambda x: x["score"], reverse=True)
+    medium.sort(key=lambda x: x["score"], reverse=True)
+    hard.sort(key=lambda x: x["score"], reverse=True)
 
     selected = []
 
@@ -171,7 +214,14 @@ review = get_due_reviews(pages)[:3]
 review_names = set([r["name"] for r in review])
 
 weak_topics = get_weak_topics(pages)
-new = get_new_problems(pages, review_names, weak_topics)
+focus_topic = get_today_focus_topic()
+
+new = get_new_problems(
+    pages=pages,
+    review_names=review_names,
+    weak_topics=weak_topics,
+    focus_topic=focus_topic,
+)
 
 # ---------------- OUTPUT ----------------
 
@@ -179,18 +229,31 @@ print("\n==============================")
 print("TODAY'S LEETCODE PLAN")
 print("==============================")
 
-print("\nWeak Topics:")
-for t in weak_topics:
-    print("-", t)
+print(f"\n📚 Today's Focus Topic: {focus_topic}")
 
-print("\n🔁 Review:")
+print("\nWeak Topics:")
+if weak_topics:
+    for topic in weak_topics:
+        print("-", topic)
+else:
+    print("None")
+
+print("\n🔁 Review (max 3):")
 if review:
-    for r in review:
-        print("-", r["name"])
+    for problem in review:
+        print("-", problem["name"])
 else:
     print("None 🎉")
 
 print("\n🆕 New (1 Easy, 2 Medium, 0-1 Hard):")
-for n in new:
-    marker = "🔥" if n[2] else ""
-    print(f"- {n[0]} {marker} ({', '.join(n[1])})")
+if new:
+    for problem in new:
+        marker = ""
+        if focus_topic in problem["topics"]:
+            marker += "📚"
+        if any(topic in weak_topics for topic in problem["topics"]):
+            marker += "🔥"
+
+        print(f"- {problem['name']} {marker} ({', '.join(problem['topics'])})")
+else:
+    print("None")
