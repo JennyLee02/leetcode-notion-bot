@@ -42,6 +42,9 @@ def get_name(page):
     title = page["properties"]["Problem"]["title"]
     return title[0]["plain_text"] if title else None
 
+def get_url(page):
+    return page["properties"]["URL"]["url"]
+
 def get_topics(page):
     return [normalize_topic(t["name"]) for t in page["properties"]["Topic"]["multi_select"]]
 
@@ -85,6 +88,7 @@ def get_due_reviews(pages):
         if next_review and next_review["start"][:10] <= today:
             due.append({
                 "name": name,
+                "url": get_url(page),
                 "id": page["id"],
                 "props": page["properties"],
             })
@@ -133,12 +137,14 @@ def build_problem_pool(pages, review_names):
 
         difficulty = get_difficulty(page)
         topics = get_topics(page)
+        url = get_url(page)
 
         if not difficulty:
             continue
 
         pool.append({
             "name": name,
+            "url": url,
             "difficulty": difficulty,
             "topics": topics,
         })
@@ -175,36 +181,21 @@ def get_balanced_new_problems(pages, review_names, weak_topics, focus_topic):
             selected.append(problem)
             selected_names.add(problem["name"])
 
-    # 1) Focus topic: 1 Easy + 1 Medium
-    add(
-        pick_first(pool, "Easy", topic=focus_topic, exclude_names=selected_names),
-        "📚 Focus Easy"
-    )
+    add(pick_first(pool, "Easy", topic=focus_topic, exclude_names=selected_names), "📚 Focus Easy")
+    add(pick_first(pool, "Medium", topic=focus_topic, exclude_names=selected_names), "📚 Focus Medium")
 
-    add(
-        pick_first(pool, "Medium", topic=focus_topic, exclude_names=selected_names),
-        "📚 Focus Medium"
-    )
-
-    # 2) Weak topic: 1 Medium + 0-1 Hard
     if primary_weak_topic:
-        add(
-            pick_first(pool, "Medium", topic=primary_weak_topic, exclude_names=selected_names),
-            "🔥 Weak Medium"
-        )
+        add(pick_first(pool, "Medium", topic=primary_weak_topic, exclude_names=selected_names), "🔥 Weak Medium")
 
         weak_hard = pick_first(pool, "Hard", topic=primary_weak_topic, exclude_names=selected_names)
 
         if weak_hard:
             add(weak_hard, "🔥 Weak Hard")
         else:
-            add(
-                pick_first(pool, "Easy", topic=primary_weak_topic, exclude_names=selected_names),
-                "🔥 Weak Easy"
-            )
+            add(pick_first(pool, "Easy", topic=primary_weak_topic, exclude_names=selected_names), "🔥 Weak Easy")
 
-    # 3) Fallbacks if the plan has fewer than 4 problems
     fallback_targets = [
+        ("Easy", primary_weak_topic, "Extra Weak Easy"),
         ("Easy", None, "Extra Easy"),
         ("Medium", focus_topic, "Extra Focus Medium"),
         ("Medium", primary_weak_topic, "Extra Weak Medium"),
@@ -216,12 +207,14 @@ def get_balanced_new_problems(pages, review_names, weak_topics, focus_topic):
         if len(selected) >= 4:
             break
 
-        add(
-            pick_first(pool, difficulty, topic=topic, exclude_names=selected_names),
-            label
-        )
+        add(pick_first(pool, difficulty, topic=topic, exclude_names=selected_names), label)
 
     return selected[:4]
+
+def discord_link(problem):
+    if problem.get("url"):
+        return f"[{problem['name']}]({problem['url']})"
+    return problem["name"]
 
 def send_to_discord(focus_topic, weak_topics, review, new):
     msg = "🔥 **Daily LeetCode Plan**\n\n"
@@ -236,7 +229,7 @@ def send_to_discord(focus_topic, weak_topics, review, new):
 
     msg += "🔁 **Review (max 3):**\n"
     if review:
-        msg += "\n".join([f"- {r['name']}" for r in review])
+        msg += "\n".join([f"- {discord_link(r)}" for r in review])
     else:
         msg += "None 🎉"
     msg += "\n\n"
@@ -244,7 +237,7 @@ def send_to_discord(focus_topic, weak_topics, review, new):
     msg += "🆕 **New:**\n"
     if new:
         for problem in new:
-            msg += f"- {problem['name']} — {problem['label']} ({', '.join(problem['topics'])})\n"
+            msg += f"- {discord_link(problem)} — {problem['label']} ({', '.join(problem['topics'])})\n"
     else:
         msg += "None\n"
 
