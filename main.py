@@ -5,7 +5,7 @@ from collections import Counter
 
 NOTION_API_KEY = os.environ["NOTION_API_KEY"]
 DATABASE_ID = os.environ["NOTION_DATABASE_ID"]
-DISCORD_WEBHOOK = os.environ["DISCORD_WEBHOOK_URL"]
+DISCORD_WEBHOOK = os.environ.get("DISCORD_WEBHOOK_URL")
 
 headers = {
     "Authorization": f"Bearer {NOTION_API_KEY}",
@@ -16,192 +16,186 @@ headers = {
 # ---------------- CURRICULUM ----------------
 
 CURRICULUM = [
-    "Arrays & Hashing", "Two Pointers", "Sliding Window", "Stack",
-    "Binary Search", "Linked List", "Trees", "Heap / Priority Queue",
-    "Backtracking", "Graphs", "1-D Dynamic Programming",
-    "2-D Dynamic Programming", "Greedy", "Intervals",
-    "Math & Geometry", "Bit Manipulation",
+    "Arrays & Hashing","Two Pointers","Sliding Window","Stack",
+    "Binary Search","Linked List","Trees","Heap / Priority Queue",
+    "Backtracking","Graphs","1-D Dynamic Programming",
+    "2-D Dynamic Programming","Greedy","Intervals",
+    "Math & Geometry","Bit Manipulation",
 ]
 
 def get_today_focus_topic():
     return CURRICULUM[datetime.now().toordinal() % len(CURRICULUM)]
 
+# ---------------- NORMALIZE ----------------
+
+def normalize(t):
+    return {
+        "Array":"Arrays & Hashing",
+        "Hashing":"Arrays & Hashing",
+        "Arrays":"Arrays & Hashing"
+    }.get(t, t)
+
 # ---------------- HELPERS ----------------
 
-def get_name(page):
-    t = page["properties"]["Problem"]["title"]
+def name(p): 
+    t = p["properties"]["Problem"]["title"]
     return t[0]["plain_text"] if t else None
 
-def get_topics(page):
-    return [t["name"] for t in page["properties"]["Topic"]["multi_select"]]
+def topics(p): 
+    return [normalize(t["name"]) for t in p["properties"]["Topic"]["multi_select"]]
 
-def get_difficulty(page):
-    d = page["properties"]["Difficulty"]["select"]
+def diff(p):
+    d = p["properties"]["Difficulty"]["select"]
     return d["name"] if d else None
 
-def get_status(page):
-    s = page["properties"]["Status"]["select"]
+def status(p):
+    s = p["properties"]["Status"]["select"]
     return s["name"] if s else None
 
-def get_confidence(page):
-    return page["properties"]["Confidence"]["number"]
+def confidence(p):
+    return p["properties"]["Confidence"]["number"]
+
+# ---------------- API ----------------
+
+def get_pages():
+    return requests.post(
+        f"https://api.notion.com/v1/databases/{DATABASE_ID}/query",
+        headers=headers
+    ).json()["results"]
+
+def update_review(pid, days):
+    date = (datetime.now() + timedelta(days=days)).strftime("%Y-%m-%d")
+    requests.patch(
+        f"https://api.notion.com/v1/pages/{pid}",
+        headers=headers,
+        json={"properties":{"Next Review":{"date":{"start":date}}}}
+    )
 
 # ---------------- REVIEW ----------------
 
-def get_due_reviews(pages):
+def due_reviews(pages):
     today = str(datetime.now().date())
-    due = []
-
-    for page in pages:
-        name = get_name(page)
-        if not name:
-            continue
-
-        next_review = page["properties"]["Next Review"]["date"]
-
-        if next_review:
-            if next_review["start"][:10] <= today:
-                due.append({
-                    "name": name,
-                    "page_id": page["id"],
-                    "props": page["properties"]
-                })
-
-    return due
-
-def update_next_review(page_id, days):
-    url = f"https://api.notion.com/v1/pages/{page_id}"
-    next_date = (datetime.now() + timedelta(days=days)).strftime("%Y-%m-%d")
-
-    payload = {
-        "properties": {
-            "Next Review": {"date": {"start": next_date}}
-        }
-    }
-
-    requests.patch(url, headers=headers, json=payload)
-
-def process_reviews(due):
-    for item in due:
-        conf = item["props"]["Confidence"]["number"]
-        if conf is None:
-            continue
-
-        if conf <= 2:
-            update_next_review(item["page_id"], 1)
-        elif conf == 3:
-            update_next_review(item["page_id"], 2)
-        elif conf == 4:
-            update_next_review(item["page_id"], 5)
-        else:
-            update_next_review(item["page_id"], 7)
-
-# ---------------- WEAK TOPICS ----------------
-
-def get_weak_topics(pages):
-    counter = Counter()
-
-    for page in pages:
-        conf = get_confidence(page)
-        if conf is not None and conf <= 2:
-            for t in get_topics(page):
-                counter[t] += 1
-
-    return [t for t, _ in counter.most_common()]
-
-# ---------------- NEW ----------------
-
-def score(item, focus, weak):
-    s = 0
-    if focus in item["topics"]:
-        s += 3
-    if any(t in weak for t in item["topics"]):
-        s += 2
-    return s
-
-def get_new(pages, review_names, weak, focus):
-    easy, medium, hard = [], [], []
+    res = []
 
     for p in pages:
-        name = get_name(p)
-        if not name or name in review_names:
-            continue
+        n = name(p)
+        if not n: continue
 
-        if get_status(p) != "Not Started":
-            continue
+        nr = p["properties"]["Next Review"]["date"]
+        if nr and nr["start"][:10] <= today:
+            res.append({"name":n,"id":p["id"],"props":p["properties"]})
 
-        diff = get_difficulty(p)
-        topics = get_topics(p)
+    return res
 
-        item = {"name": name, "topics": topics}
-        item["score"] = score(item, focus, weak)
+def process(due):
+    for i in due:
+        c = i["props"]["Confidence"]["number"]
+        if c is None: continue
 
-        if diff == "Easy":
-            easy.append(item)
-        elif diff == "Medium":
-            medium.append(item)
-        elif diff == "Hard":
-            hard.append(item)
+        if c <= 2: update_review(i["id"],1)
+        elif c == 3: update_review(i["id"],2)
+        elif c == 4: update_review(i["id"],5)
+        else: update_review(i["id"],7)
 
-    easy.sort(key=lambda x: x["score"], reverse=True)
-    medium.sort(key=lambda x: x["score"], reverse=True)
-    hard.sort(key=lambda x: x["score"], reverse=True)
+# ---------------- WEAK ----------------
+
+def weak_topics(pages):
+    c = Counter()
+    for p in pages:
+        conf = confidence(p)
+        if conf is not None and conf <= 2:
+            for t in topics(p):
+                c[t]+=1
+    return [t for t,_ in c.most_common()]
+
+# ---------------- NEW LOGIC ----------------
+
+def get_new(pages, review_names, weak, focus):
+    easy_w, easy_o = [], []
+    med_w, med_f, med_o = [], [], []
+    hard_f, hard_o = [], []
+
+    for p in pages:
+        n = name(p)
+        if not n or n in review_names: continue
+        if status(p) != "Not Started": continue
+
+        t = topics(p)
+        d = diff(p)
+
+        is_weak = any(x in weak for x in t)
+        is_focus = focus in t
+
+        item = (n,t)
+
+        if d == "Easy":
+            (easy_w if is_weak else easy_o).append(item)
+
+        elif d == "Medium":
+            if is_weak: med_w.append(item)
+            elif is_focus: med_f.append(item)
+            else: med_o.append(item)
+
+        elif d == "Hard":
+            if is_focus: hard_f.append(item)
+            else: hard_o.append(item)
 
     selected = []
-    if easy: selected.append(easy[0])
-    selected.extend(medium[:2])
-    if hard: selected.append(hard[0])
+
+    # Easy → MUST weak if possible
+    if easy_w: selected.append(easy_w[0])
+    elif easy_o: selected.append(easy_o[0])
+
+    # Medium → weak first, then focus
+    selected.extend(med_w[:2])
+    if len(selected) < 3:
+        selected.extend(med_f[:(3-len(selected))])
+    if len(selected) < 3:
+        selected.extend(med_o[:(3-len(selected))])
+
+    # Hard → focus preferred
+    if hard_f: selected.append(hard_f[0])
+    elif hard_o: selected.append(hard_o[0])
 
     return selected
 
 # ---------------- DISCORD ----------------
 
-def send_to_discord(focus, weak, review, new):
-    msg = f"🔥 **Daily LeetCode Plan**\n\n"
-    msg += f"📚 Focus: {focus}\n\n"
+def send(focus, weak, review, new):
+    msg = f"🔥 **Daily LeetCode Plan**\n\n📚 Focus: {focus}\n\n"
 
     msg += "**Weak Topics:**\n"
-    if weak:
-        msg += "\n".join([f"- {t}" for t in weak]) + "\n\n"
-    else:
-        msg += "None\n\n"
+    msg += "\n".join([f"- {t}" for t in weak]) if weak else "None"
+    msg += "\n\n"
 
     msg += "**Review:**\n"
-    if review:
-        msg += "\n".join([f"- {r['name']}" for r in review]) + "\n\n"
-    else:
-        msg += "None 🎉\n\n"
+    msg += "\n".join([f"- {r['name']}" for r in review]) if review else "None 🎉"
+    msg += "\n\n"
 
     msg += "**New:**\n"
-    for n in new:
-        msg += f"- {n['name']} ({', '.join(n['topics'])})\n"
+    for n,t in new:
+        msg += f"- {n} ({', '.join(t)})\n"
 
-    requests.post(DISCORD_WEBHOOK, json={"content": msg})
+    if DISCORD_WEBHOOK:
+        requests.post(DISCORD_WEBHOOK,json={"content":msg})
 
 # ---------------- MAIN ----------------
 
-pages = requests.post(
-    f"https://api.notion.com/v1/databases/{DATABASE_ID}/query",
-    headers=headers
-).json()["results"]
+pages = get_pages()
 
-due = get_due_reviews(pages)
-process_reviews(due)
+due = due_reviews(pages)
+process(due)
 
-pages = requests.post(
-    f"https://api.notion.com/v1/databases/{DATABASE_ID}/query",
-    headers=headers
-).json()["results"]
+pages = get_pages()
 
-review = get_due_reviews(pages)[:3]
+review = due_reviews(pages)[:3]
 review_names = set([r["name"] for r in review])
 
-weak = get_weak_topics(pages)
+weak = weak_topics(pages)
 focus = get_today_focus_topic()
 
 new = get_new(pages, review_names, weak, focus)
 
-# send to discord
-send_to_discord(focus, weak, review, new)
+send(focus, weak, review, new)
 
 print("Sent to Discord ✅")
